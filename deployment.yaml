@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: token-auth
+  labels:
+    app: token-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: token-auth
+  template:
+    metadata:
+      labels:
+        app: token-auth
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: 'metrics'
+    spec:
+      #nodeName: kube-auto-sg-sg5-test-10-131-95-112
+      containers:
+        - name: token-auth
+          image: IMAGE_HOLDER
+
+          ports:
+            - containerPort: 8081
+          resources:
+            requests:
+              cpu: 1
+              memory: 100Mi
+            limits:
+              cpu: 1
+              memory: 100Mi
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: token-auth
+  labels:
+    app: token-auth
+spec:
+  selector:
+    app: token-auth # 选择我们上面创建dep中的nginx pod，
+  ports:
+    - name: metrics
+      protocol: TCP
+      port: 8081  # service对外暴露的端口
+      targetPort: 8081 # 代表目标容器的端口是80
